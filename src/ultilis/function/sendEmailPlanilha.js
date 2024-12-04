@@ -6,7 +6,7 @@ async function sendPlanilha(buffer, user, fileName) {
     try {
         const htmlExcel = await planilhaEmailHTML(user);
         const message = {
-            from: "marcusvini6277@gmail.com",
+            from: "schmi@dottie.pro",
             to: [user.email],
             bcc: ['marcusvf.silva@outlook.com'],
             subject: `Planilha de Dados`,
