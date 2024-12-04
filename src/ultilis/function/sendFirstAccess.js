@@ -7,8 +7,8 @@ async function sendFirstAccess(user) {
         console.log('buffer: ', buffer)
 
         const message = {
-            from: "marcusvini6277@gmail.com",
-            to: "marcusvf.silva@outlook.com",
+            from: "schmi@dottie.pro",
+            to: user.email,
             subject: `Dottie - Credenciais de Acesso`,
             html: htmlExcel,
         };
