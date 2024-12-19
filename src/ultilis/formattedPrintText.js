@@ -104,31 +104,31 @@ async function formattedTextFromImage(text, plataform, format) {
 
 async function processInstagram(text, format) {
     const regexPatternsInstagram = {
-        impressoes: /impress[õo]es?\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        visualizacoes: /visualiza[çc][õo]es?\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        alcance: /alcance\s*i?\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        seguidores_alcancados: /seguidores\s*[:\-]?\s*(\d+[,.]?\d*)?\s*([\d,.]+)%/i,
-        nao_seguidores_integram: /n[ãa]o\s*seguidores\s*[:\-]?\s*(\d+[,.]?\d*)?\s*([\d,.]+)%/i,
-        visualizacoes_completas: /visualiza[çc][õo]es?\s+completas?\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        taxa_retencao: /taxa\s+de\s+reten[çc][ãa]o\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        tempo_medio_visualizacao: /tempo\s+m[eé]dio\s+de\s+visualiza[çc][ãa]o\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        taxa_for_you: /taxa\s+for\s+you\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        cliques_link: /cliques?\s+no\s+link\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        clique_arroba: /cliques?\s+no\s+arroba\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        clique_hashtag: /nas\s+hashtags\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        avancar: /avan[çc]o\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        voltar: /voltar\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        sair: /saiu\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        proximo_story: /pr[óo]ximo\s+story\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        visitas_perfil: /visitas?\s+ao\s+perfil\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        comecaram_seguir: /come[çc]aram?\s+a?\s*seguir\s*[:\-]?\s*(\d+[,.]?\d*)/is,
-        tempo_stories: /tempo\s+nos\s+stories\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        curtidas: /curtidas\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        salvamentos: /salvamentos\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        compartilhamentos: /compartilhamentos\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        // comentarios: /coment[áa]rios\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        comentarios: /(?:coment[áa]rios|respostas?)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        impressoes: /(?:impress[õo]es|impressions)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        visualizacoes: /(?:visualiza[çc][õo]es|views)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        alcance: /(?:alcance|reach)\s*i?\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        seguidores_alcancados: /(?:seguidores\s*alcan[çc]ados|followers\s*reached)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        nao_seguidores_integram: /(?:n[ãa]o\s*seguidores\s*integram|non\s*followers\s*integrate)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        visualizacoes_completas: /(?:visualiza[çc][õo]es?\s+completas?|complete\s*views)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        taxa_retencao: /(?:taxa\s+de\s+reten[çc][ãa]o|retention\s*rate)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        tempo_medio_visualizacao: /(?:tempo\s+m[eé]dio\s+de\s+visualiza[çc][ãa]o|average\s*view\s*time)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        taxa_for_you: /(?:taxa\s+for\s+you|for\s+you\s*rate)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        cliques_link: /(?:cliques?\s+no\s+link|link\s*clicks?)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        clique_arroba: /(?:cliques?\s+no\s+arroba|arroba\s*clicks?)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        clique_hashtag: /(?:nas\s+hashtags|hashtag\s*clicks?)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        avancar: /(?:avan[çc]o|forward)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        voltar: /(?:voltar|back)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        sair: /(?:saiu|exit)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        proximo_story: /(?:pr[óo]ximo\s+story|next\s*story)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        visitas_perfil: /(?:visitas?\s+ao\s+perfil|profile\s*visits?)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        comecaram_seguir: /(?:come[çc]aram?\s+a?\s*seguir|started\s*following)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        tempo_stories: /(?:tempo\s+nos\s+stories|time\s*on\s*stories)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        curtidas: /(?:curtidas|likes)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        salvamentos: /(?:salvamentos|saves)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        compartilhamentos: /(?:compartilhamentos|shares)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        comentarios: /(?:coment[áa]rios|respostas?|comments|replies)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
     };
+
 
     let extractedData = {
         impressoes: null,
@@ -168,8 +168,9 @@ async function processInstagram(text, format) {
 
     if (format.toLowerCase() === 'reels') {
         const result = text.toLowerCase().split(/\s+/);
-        const reproducaoIndex = result.indexOf('reproduções');
-        const contasAlcancadasIndex = result.indexOf('alcançadas');
+        const reproducaoIndex = result.indexOf('reproduções') !== -1 ? result.indexOf('reproduções') : result.indexOf('views');
+        const contasAlcancadasIndex = result.indexOf('alcançadas') !== -1 ? result.indexOf('alcançadas') : result.indexOf('accounts');
+
 
         if (reproducaoIndex !== -1 && result[reproducaoIndex + 1]) {
             const formattedValue = result[reproducaoIndex + 1].replace(/[,.]/g, '');
@@ -191,7 +192,12 @@ async function processInstagram(text, format) {
 
 
     if (format.toLowerCase() === 'story') {
-        const alcanceMatch = text.match(/contas\s*alcançadas\s*[:\-]?\s*(\d+[,.]?\d*)/i);
+        // const alcanceMatch = text.match(/contas\s*alcançadas\s*[:\-]?\s*(\d+[,.]?\d*)/i);
+        const alcanceMatch = text.match(/(?:contas\s*alcançadas|accounts\s*reached)\s*[:\-]?\s*(\d+[,.]?\d*)/i);
+
+        console.log('text: ', text)
+        console.log('alcanceMatch: ', alcanceMatch)
+
 
         if (alcanceMatch) {
             const alcanceFormatted = parseInt(alcanceMatch[1].replace(/[.,]/g, ''));
@@ -202,6 +208,9 @@ async function processInstagram(text, format) {
             const nearbyText = text.slice(Math.max(0, alcanceIndex - 50), alcanceIndex); // Pegamos até 50 caracteres antes para analisar
 
             let porcentagens = nearbyText.match(/(\d+[,.]?\d*)%/g); // Captura todas as porcentagens no trecho próximo
+
+            console.log('porcentagens: ', porcentagens)
+
 
             if (porcentagens && porcentagens.length >= 2) {
                 let firstPorcentage = parseFloat(porcentagens[0]?.replace(',', '.'));
@@ -232,7 +241,6 @@ async function processInstagram(text, format) {
             if (porcentagens.length >= 2) {
                 let firstPorcentage = parseFloat(porcentagens[0].replace(',', '.'));
                 let secondPorcentage = parseFloat(porcentagens[1].replace(',', '.'));
-        
                 // Se as porcentagens somam 100
                 if ((firstPorcentage + secondPorcentage) === 100) {
                     extractedData.seguidores_alcancados = Math.round(calculationPercentageOfValue(firstPorcentage, alcanceFormatted));
