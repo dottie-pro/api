@@ -118,7 +118,7 @@ async function processInstagram(text, format) {
         clique_hashtag: /(?:nas\s+hashtags|hashtag\s*clicks?)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
         avancar: /(?:avan[çc]o|forward)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
         voltar: /(?:voltar|back)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-        sair: /(?:saiu|exit)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+        sair: /(?:saiu|exited)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
         proximo_story: /(?:pr[óo]ximo\s+story|next\s*story)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
         visitas_perfil: /(?:visitas?\s+ao\s+perfil|profile\s*visits?)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
         comecaram_seguir: /(?:come[çc]aram?\s+a?\s*seguir|started\s*following)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
