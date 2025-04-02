@@ -131,7 +131,7 @@ class TextDataFilesController {
       const fileName = `${formattDateAndHour()}_extracao_dottie`;
       const sheetName = `${formattDateAndHour()}`;
 
-      // Gerando a sheet principal
+      // Gerando a sheet principal-
       const ws = XLSX.utils.json_to_sheet(textFileData, {
         header: ColumnsPlanilha,
       });
