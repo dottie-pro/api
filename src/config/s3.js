@@ -1,8 +1,7 @@
-const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3');
-require('dotenv').config();
+const { S3Client, DeleteObjectCommand } = require("@aws-sdk/client-s3");
+require("dotenv").config();
 
-const s3Client = new S3Client({ region: 'us-east-2' });
-
+const s3Client = new S3Client({ region: "us-east-2" });
 
 const deleteObjectFromS3 = async (key) => {
   const deleteParams = {
@@ -12,8 +11,8 @@ const deleteObjectFromS3 = async (key) => {
 
   try {
     await s3Client.send(new DeleteObjectCommand(deleteParams));
- } catch (error) {
-    console.log('Erro ao excluir objeto:', error);
+  } catch (error) {
+    console.log("Erro ao excluir objeto:", error);
     throw error;
   }
 };
