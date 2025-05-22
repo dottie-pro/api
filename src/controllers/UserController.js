@@ -6,6 +6,7 @@ const { trusted } = require("mongoose");
 const sgMail = require("@sendgrid/mail");
 const { sendFirstAccess } = require("../ultilis/function/sendFirstAccess");
 const { deleteObjectFromS3 } = require("../config/s3");
+const { Scheduler } = require("../services/scheduler/scheduler");
 
 class UserController {
   list = async (req, res) => {
@@ -66,9 +67,11 @@ class UserController {
 
       await sendFirstAccess({ name: newUser.name, senha, email });
 
+      await Scheduler.createTrial(newUser._id);
+
       res.status(201).json({ newUser, success: true });
     } catch (error) {
-      console.log(error.response);
+      console.log("UserController add error: ", error);
       res.status(500).json({ error: error.response?.data, success: false });
     }
   };
