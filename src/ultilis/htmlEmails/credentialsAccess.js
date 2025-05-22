@@ -1,6 +1,5 @@
 async function credentialsAccessHTML(user) {
-    return (
-        `
+  return `
             <!DOCTYPE html>
             <html lang="en">
             
@@ -14,9 +13,8 @@ async function credentialsAccessHTML(user) {
             <div>
             <div>
                 <p>Olá! ${user?.name},</p>
-                <p>Você já pode acessar o painel Dottie.</p>
-                <a href="https://dottie-plataforma-develop.vercel.app" target="_blank">Painel Dottie</a>
-    
+                <p>Você já pode acessar o <a href="https://dottie-plataforma-develop.vercel.app" target="_blank">painel dottie</a></p>
+                
                 <p>Faça login com as Credenciais de acesso abaixo:</p>
    
                 <p style="font-size: 18px;">Login: ${user?.email}</p>
@@ -25,8 +23,7 @@ async function credentialsAccessHTML(user) {
    
         <div style="display: flex; align-items: center; justify-content: flex-start; margin-top: 20px;">
           <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
-             <img src="https://mf-planejados.s3.amazonaws.com/avatar-dottie.png" alt="Logo da Empresa">
-             <img src="https://mf-planejados.s3.amazonaws.com/logo-dottie.png" alt="Nome da Empresa">
+             <img src="https://dottie-assets.s3.us-east-2.amazonaws.com/logo_dottie_pro.png" alt="Logo da Empresa" width="150px">
           </div>
         </div>
         </div>
@@ -34,11 +31,9 @@ async function credentialsAccessHTML(user) {
             </body>
             
             </html>
-        `
-    )
+        `;
 }
 
-
 module.exports = {
-    credentialsAccessHTML
+  credentialsAccessHTML,
 };

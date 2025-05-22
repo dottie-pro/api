@@ -8,7 +8,7 @@ async function sendFirstAccess(user) {
     const message = {
       from: "schmi@dottie.pro",
       to: user.email,
-      subject: `Dottie - Credenciais de Acesso`,
+      subject: `[dottie] Credenciais de Acesso`,
       html: htmlExcel,
     };
 
