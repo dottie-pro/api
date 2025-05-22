@@ -8,7 +8,7 @@ const { formattedTextFromImage } = require("../ultilis/formattedPrintText");
 const FileTextData = require("../models/FileTextData");
 const { deleteObjectFromS3 } = require("../config/s3");
 const { calculationPercentageOfValue } = require("../ultilis");
-
+const { canTakeAction } = require("../helpers/trial/trial");
 const textract = new TextractClient({ region: "us-east-2" });
 
 exports.upload = async (req, res) => {
@@ -26,6 +26,20 @@ exports.upload = async (req, res) => {
       groupKey = null,
       data_publicacao = null,
     } = req.query;
+
+    const fileTextData = await FileTextData.findOne({ groupKey });
+
+    // Verifica se o usuário pode fazer o upload do arquivo
+    if (!fileTextData) {
+      try {
+        await canTakeAction(userId);
+      } catch (error) {
+        return res.status(403).json({
+          msg: "Você não possui créditos suficientes para esta ação, adquira uma assinatura ou aguarde o período de renovação de créditos.",
+          success: false,
+        });
+      }
+    }
 
     // Função para processar o arquivo no Textract
     const analyzeWithTextract = async (bucket, fileName) => {
@@ -84,100 +98,76 @@ exports.upload = async (req, res) => {
         success: false,
       });
 
-    if (groupKey) {
-      const fileTextData = await FileTextData.findOne({ groupKey });
+    if (fileTextData) {
+      let updatedFields = {};
 
-      if (fileTextData) {
-        let updatedFields = {};
+      // Percorre os dados da transcrição e soma os valores
+      for (const fileKey in analyticsDataTranscription) {
+        if (analyticsDataTranscription[fileKey]) {
+          const dbValue = fileTextData[fileKey];
+          const newValue = analyticsDataTranscription[fileKey];
 
-        // Percorre os dados da transcrição e soma os valores
-        for (const fileKey in analyticsDataTranscription) {
-          if (analyticsDataTranscription[fileKey]) {
-            const dbValue = fileTextData[fileKey];
-            const newValue = analyticsDataTranscription[fileKey];
+          // Se o valor da transcrição for numérico, soma ao valor existente (ou usa 0 se não houver valor)
+          if (typeof newValue === "number") {
+            updatedFields[fileKey] =
+              (typeof dbValue === "number" ? dbValue : 0) + newValue;
 
-            // Se o valor da transcrição for numérico, soma ao valor existente (ou usa 0 se não houver valor)
-            if (typeof newValue === "number") {
-              updatedFields[fileKey] =
-                (typeof dbValue === "number" ? dbValue : 0) + newValue;
+            // Se o valor for uma string e não houver valor existente no banco ou o valor existente for null, atualiza
+          } else if (
+            typeof newValue === "string" &&
+            (!dbValue || dbValue === null)
+          ) {
+            updatedFields[fileKey] = newValue;
 
-              // Se o valor for uma string e não houver valor existente no banco ou o valor existente for null, atualiza
-            } else if (
-              typeof newValue === "string" &&
-              (!dbValue || dbValue === null)
-            ) {
-              updatedFields[fileKey] = newValue;
+            // Se for string e já houver valor, mantém o valor existente no banco
+          } else if (
+            typeof newValue === "string" &&
+            typeof dbValue === "string"
+          ) {
+            updatedFields[fileKey] = dbValue; // Mantém o valor existente no banco
+          }
 
-              // Se for string e já houver valor, mantém o valor existente no banco
-            } else if (
-              typeof newValue === "string" &&
-              typeof dbValue === "string"
-            ) {
-              updatedFields[fileKey] = dbValue; // Mantém o valor existente no banco
-            }
+          if (
+            (fileKey === "seguidores_alcancados" ||
+              fileKey === "nao_seguidores_integram") &&
+            plataform?.toLowerCase() === "tiktok"
+          ) {
+            const visualizations =
+              fileTextData.visualizacoes ||
+              analyticsDataTranscription.visualizacoes;
+            const porcentageString = dbValue || newValue;
 
-            if (
-              (fileKey === "seguidores_alcancados" ||
-                fileKey === "nao_seguidores_integram") &&
-              plataform?.toLowerCase() === "tiktok"
-            ) {
-              const visualizations =
-                fileTextData.visualizacoes ||
-                analyticsDataTranscription.visualizacoes;
-              const porcentageString = dbValue || newValue;
+            if (visualizations && porcentageString) {
+              const formattedPorcentage = parseFloat(
+                porcentageString.replace("%", "").replace(",", ".")
+              );
 
-              if (visualizations && porcentageString) {
-                const formattedPorcentage = parseFloat(
-                  porcentageString.replace("%", "").replace(",", ".")
+              if (!isNaN(formattedPorcentage)) {
+                updatedFields[fileKey] = Math.round(
+                  calculationPercentageOfValue(
+                    formattedPorcentage,
+                    visualizations
+                  )
                 );
-
-                if (!isNaN(formattedPorcentage)) {
-                  updatedFields[fileKey] = Math.round(
-                    calculationPercentageOfValue(
-                      formattedPorcentage,
-                      visualizations
-                    )
-                  );
-                }
               }
             }
           }
         }
-
-        // Atualiza o objeto usando $set e $push separadamente
-        await FileTextData.findByIdAndUpdate(
-          fileTextData._id,
-          { $set: updatedFields },
-          { new: true }
-        );
-        await FileTextData.findByIdAndUpdate(fileTextData._id, {
-          $push: { files: file?._id },
-        });
-
-        return res
-          .status(201)
-          .json({ textDataId: fileTextData._id, success: true });
-      } else {
-        updateFiles.push(file._id);
-        const fileTextData = await FileTextData.create({
-          ...analyticsDataTranscription,
-          userId,
-          influencer,
-          campaign,
-          followersNumber: formattedFollowersNumber,
-          plataform,
-          format,
-          type,
-          groupKey,
-          marca_cliente,
-          data_publicacao,
-          files: updateFiles,
-        });
-
-        return res
-          .status(201)
-          .json({ textDataId: fileTextData._id, success: true });
       }
+
+      // Atualiza o objeto usando $set e $push separadamente
+      await FileTextData.findByIdAndUpdate(
+        fileTextData._id,
+        { $set: updatedFields },
+        { new: true }
+      );
+      await FileTextData.findByIdAndUpdate(fileTextData._id, {
+        $push: { files: file?._id },
+      });
+
+      return res
+        .status(201)
+        .json({ textDataId: fileTextData._id, success: true });
     } else {
       updateFiles.push(file._id);
       const fileTextData = await FileTextData.create({
@@ -194,6 +184,7 @@ exports.upload = async (req, res) => {
         data_publicacao,
         files: updateFiles,
       });
+
       return res
         .status(201)
         .json({ textDataId: fileTextData._id, success: true });
