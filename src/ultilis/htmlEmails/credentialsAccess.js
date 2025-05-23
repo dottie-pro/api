@@ -13,7 +13,7 @@ async function credentialsAccessHTML(user) {
             <div>
             <div>
                 <p>Olá! ${user?.name},</p>
-                <p>Você já pode acessar o <a href="https://dottie-plataforma-develop.vercel.app" target="_blank">painel dottie</a></p>
+                <p>Você já pode acessar o <a href="https://leitor.dottie.pro" target="_blank">painel dottie</a></p>
                 
                 <p>Faça login com as Credenciais de acesso abaixo:</p>
    

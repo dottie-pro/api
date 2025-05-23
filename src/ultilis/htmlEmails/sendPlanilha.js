@@ -1,6 +1,5 @@
 async function planilhaEmailHTML(user) {
-    return (
-        `
+  return `
             <!DOCTYPE html>
             <html lang="en">
             
@@ -15,7 +14,7 @@ async function planilhaEmailHTML(user) {
                     <div>
                         <p>Oi, ${user.name}! 🧡</p>
                         <p>Seu arquivo está prontinho e recheado com todos os dados que você adicionou. Dá uma olhada no seu email – a planilha com as informações processadas está anexa, prontinha pra você analisar com calma. ✨</p>
-                        <p>Ah, e se quiser ver mais detalhes ou explorar seu histórico de arquivos, é só acessar o  <a href="https://dottie-plataforma-develop.vercel.app" target="_blank">painel da dottie</a>. Estou aqui pra te ajudar em cada insight e descoberta! 🚀</p>
+                        <p>Ah, e se quiser ver mais detalhes ou explorar seu histórico de arquivos, é só acessar o  <a href="https://leitor.dottie.pro" target="_blank">painel da dottie</a>. Estou aqui pra te ajudar em cada insight e descoberta! 🚀</p>
                         <p>Vamos nessa? 📊🧡</p>
                     </div>
 
@@ -30,11 +29,9 @@ async function planilhaEmailHTML(user) {
             </body>
             
             </html>
-        `
-    )
+        `;
 }
 
-
 module.exports = {
-    planilhaEmailHTML
+  planilhaEmailHTML,
 };
