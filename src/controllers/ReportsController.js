@@ -305,7 +305,9 @@ class ReportsController {
       // Alcance Total: Maior número de alcance por influenciador
       indicadores.alcance_total = Math.max(
         ...Object.values(
-          data.map((item) => (item.alcance ? Number(item.alcance) : 0))
+          data.map((item) =>
+            item.alcance && !isNaN(item.alcance) ? Number(item.alcance) : 0
+          )
         )
       );
 

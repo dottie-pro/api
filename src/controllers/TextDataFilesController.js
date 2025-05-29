@@ -70,7 +70,6 @@ class TextDataFilesController {
             path: "files",
             model: "File",
           });
-          console.log("textData", textData);
 
           // Mapeia os dados de acordo com as colunas
           textFileData.push({
