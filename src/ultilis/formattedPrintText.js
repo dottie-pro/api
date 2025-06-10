@@ -338,9 +338,9 @@ async function processTikTok(text) {
         extractedData.tempo_medio_visualizacao =
           extractedData.tempo_medio_visualizacao || result[completoIndex + 1];
         // extractedData.taxa_retencao = extractedData.taxa_retencao || (result[completoIndex + 3] + '%');
-        extractedData.taxa_retencao =
-          extractedData.taxa_retencao ||
-          includesPorcentage(result[completoIndex + 3]);
+        // extractedData.taxa_retencao =
+        //   extractedData.taxa_retencao ||
+        //   includesPorcentage(result[completoIndex + 3]);
 
         if (result[completoIndex + 3]) {
           const porcentageVisualizacoesCompletas = parseFloat(
@@ -365,7 +365,10 @@ async function processTikTok(text) {
       extractedData.nao_seguidores_integram = result[seguidoresIndex - 3];
     }
 
-    if (result.includes("para") && result.includes("voce")) {
+    if (
+      result.includes("para") &&
+      (result.includes("voce") || result.includes("vace"))
+    ) {
       const paraIndex = result.indexOf("para");
       if (paraIndex + 1 < result.length) {
         // Verifique se o próximo elemento é um número com porcentagem

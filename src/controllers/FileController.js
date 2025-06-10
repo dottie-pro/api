@@ -10,6 +10,14 @@ const { deleteObjectFromS3 } = require("../config/s3");
 const { calculationPercentageOfValue } = require("../ultilis");
 const { canTakeAction } = require("../helpers/trial/trial");
 const textract = new TextractClient({ region: "us-east-2" });
+const sharp = require("sharp");
+const {
+  S3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+  DeleteObjectCommand,
+} = require("@aws-sdk/client-s3");
+const { Readable } = require("stream");
 
 exports.upload = async (req, res) => {
   try {
@@ -43,11 +51,37 @@ exports.upload = async (req, res) => {
 
     // Função para processar o arquivo no Textract
     const analyzeWithTextract = async (bucket, fileName) => {
+      // Primeiro, baixar a imagem do S3
+      const s3Client = new S3Client({ region: "us-east-2" });
+      const getObjectCommand = new GetObjectCommand({
+        Bucket: bucket,
+        Key: fileName,
+      });
+
+      const response = await s3Client.send(getObjectCommand);
+      const imageBuffer = await streamToBuffer(response.Body);
+
+      // Processar a imagem para melhorar a precisão do OCR
+      const processedImageBuffer = await sharp(imageBuffer)
+        .grayscale() // Converter para escala de cinza
+        .toBuffer();
+
+      // Fazer upload da imagem processada de volta para o S3
+      const processedFileName = `processed_${fileName}`;
+      await s3Client.send(
+        new PutObjectCommand({
+          Bucket: bucket,
+          Key: processedFileName,
+          Body: processedImageBuffer,
+          ContentType: "image/png",
+        })
+      );
+
       const params = {
         Document: {
           S3Object: {
             Bucket: bucket,
-            Name: fileName,
+            Name: processedFileName,
           },
         },
       };
@@ -55,7 +89,25 @@ exports.upload = async (req, res) => {
       // Usar Textract para detectar o texto
       const command = new DetectDocumentTextCommand(params);
       const result = await textract.send(command);
+
+      // Limpar o arquivo processado após o uso
+      await s3Client.send(
+        new DeleteObjectCommand({
+          Bucket: bucket,
+          Key: processedFileName,
+        })
+      );
+
       return result;
+    };
+
+    // Função auxiliar para converter stream em buffer
+    const streamToBuffer = async (stream) => {
+      const chunks = [];
+      for await (const chunk of stream) {
+        chunks.push(chunk);
+      }
+      return Buffer.concat(chunks);
     };
 
     const bucketName = process.env.BUCKET_NAME;
