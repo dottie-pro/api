@@ -327,20 +327,19 @@ async function processTikTok(text) {
           extractedData.salvamentos || result[visaoIndex - 1];
       }
 
-      const retencaoIndex = result.indexOf("retencao");
-      if (retencaoIndex >= 0) {
-        extractedData.taxa_retencao =
-          extractedData.taxa_retencao || result[retencaoIndex + 8];
-      }
+      // const retencaoIndex = result.indexOf("retencao");
+      // if (retencaoIndex >= 0) {
+      //   extractedData.taxa_retencao =
+      //     extractedData.taxa_retencao || result[retencaoIndex + 8];
+      // }
 
       const completoIndex = result.indexOf("completo");
       if (completoIndex >= 0) {
         extractedData.tempo_medio_visualizacao =
           extractedData.tempo_medio_visualizacao || result[completoIndex + 1];
-        // extractedData.taxa_retencao = extractedData.taxa_retencao || (result[completoIndex + 3] + '%');
-        // extractedData.taxa_retencao =
-        //   extractedData.taxa_retencao ||
-        //   includesPorcentage(result[completoIndex + 3]);
+        extractedData.taxa_retencao = includesPorcentage(
+          result[completoIndex + 3]
+        );
 
         if (result[completoIndex + 3]) {
           const porcentageVisualizacoesCompletas = parseFloat(
