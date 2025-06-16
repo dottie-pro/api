@@ -198,6 +198,9 @@ async function processInstagram(text, format) {
     if (contasAlcancadasIndex !== -1 && result[contasAlcancadasIndex + 1]) {
       extractedData.contas_alcancadas = result[contasAlcancadasIndex + 1];
       extractedData.alcance = result[contasAlcancadasIndex + 1];
+      const alcanceFormatted = parseInt(
+        result[contasAlcancadasIndex + 1].replace(/[,.]/g, "")
+      );
 
       // Procurar as porcentagens próximas à posição do alcance
       const nearbyWords = result.slice(alcanceReels, alcanceReels + 20); // Pega palavras ao redor do alcance
