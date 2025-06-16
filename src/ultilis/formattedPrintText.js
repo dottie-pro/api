@@ -188,6 +188,8 @@ async function processInstagram(text, format) {
         ? result.indexOf("alcançadas")
         : result.indexOf("accounts");
 
+    const alcanceReels = result.indexOf("alcance");
+
     if (reproducaoIndex !== -1 && result[reproducaoIndex + 1]) {
       const formattedValue = result[reproducaoIndex + 1].replace(/[,.]/g, "");
       extractedData.visualizacoes = parseInt(formattedValue, 10) || 0;
@@ -195,6 +197,25 @@ async function processInstagram(text, format) {
 
     if (contasAlcancadasIndex !== -1 && result[contasAlcancadasIndex + 1]) {
       extractedData.contas_alcancadas = result[contasAlcancadasIndex + 1];
+      extractedData.alcance = result[contasAlcancadasIndex + 1];
+
+      // Procurar as porcentagens próximas à posição do alcance
+      const nearbyWords = result.slice(alcanceReels, alcanceReels + 20); // Pega palavras ao redor do alcance
+      const porcentagens = nearbyWords.filter((word) => word.includes("%")); // Filtra as porcentagens
+
+      if (porcentagens.length >= 2) {
+        let firstPorcentage = parseFloat(porcentagens[0].replace(",", "."));
+        let secondPorcentage = parseFloat(porcentagens[1].replace(",", "."));
+        // Se as porcentagens somam 100
+        if (firstPorcentage + secondPorcentage === 100) {
+          extractedData.seguidores_alcancados = Math.round(
+            calculationPercentageOfValue(firstPorcentage, alcanceFormatted)
+          );
+          extractedData.nao_seguidores_integram = Math.round(
+            calculationPercentageOfValue(secondPorcentage, alcanceFormatted)
+          );
+        }
+      }
     }
   }
 
@@ -251,6 +272,7 @@ async function processInstagram(text, format) {
   }
 
   if (format.toLowerCase() === "reels") {
+    // @TODO: trocar alcance para contas alcancadas (apenas valor) e recalcular alcance/seguidores e alcance/nao seguidores
     // const alcanceMatch = text.match(/contas\s*alcançadas\s*[:\-]?\s*(\d+[,.]?\d*)/i);
     const result = text
       .toLowerCase()
