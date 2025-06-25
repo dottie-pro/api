@@ -18,7 +18,7 @@ async function sendDailyData(users, analytics, usersWhoUsed) {
 
     const message = {
       from: "schmi@dottie.pro",
-      to: ["schmi@dottie.pro"],
+      to: ["schmi@dottie.pro", "erickkarl5@gmail.com"],
       subject: `Dados Diários - ${yesterdayDate}`,
       html: htmlDailyData,
     };

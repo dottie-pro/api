@@ -24,7 +24,7 @@ class Routines {
     return Routines.instance;
   }
 
-  async setRoutineCheckNewUsers(hour = 9) {
+  async setRoutineCheckNewUsers(hour = 11) {
     if (this.dailyTimer) {
       clearTimeout(this.dailyTimer);
     }
