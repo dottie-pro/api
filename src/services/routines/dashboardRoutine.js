@@ -9,6 +9,7 @@ class DashboardRoutine {
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const today = new Date();
 
+    console.log("Checking new data...", yesterday);
     // First, get the userIds for the emails we want to exclude
     const excludedUsers = await User.find({
       email: { $in: ["erickkarl5@gmail.com", "schmi@dottie.pro"] },

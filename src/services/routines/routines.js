@@ -33,7 +33,7 @@ class Routines {
       const now = new Date();
       const nextRun = new Date(now);
 
-      nextRun.setHours(hour, 0, 0, 0);
+      nextRun.setHours(12, 6, 0, 0);
 
       // If the time has already passed today, schedule for tomorrow
       if (now > nextRun) {
@@ -43,6 +43,7 @@ class Routines {
       const timeUntilNextRun = nextRun.getTime() - now.getTime();
 
       this.dailyTimer = setTimeout(async () => {
+        console.log("Routine check new users executed!");
         await DashboardRoutine.checkNewData();
         scheduleNextRun(); // Schedule the next run
       }, timeUntilNextRun);
