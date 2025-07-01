@@ -1,4 +1,4 @@
-const Analytics = require("../../models/Analytics");
+const FileTextData = require("../../models/FileTextData");
 const User = require("../../models/User");
 const { sendDailyData } = require("../../ultilis/function/sendDailyData");
 
@@ -25,7 +25,7 @@ class DashboardRoutine {
       _id: { $nin: excludedUserIds },
     });
 
-    const analyticsFromYesterday = await Analytics.find({
+    const fileTextData = await FileTextData.find({
       createdAt: {
         $gte: yesterday,
         $lt: today,
@@ -35,14 +35,12 @@ class DashboardRoutine {
       },
     });
 
-    const userIdsWhoUsed = analyticsFromYesterday.map(
-      (analysis) => analysis.userId
-    );
+    const userIdsWhoUsed = fileTextData.map((analysis) => analysis.userId);
     const usersWhoUsed = await User.find({
       _id: { $in: userIdsWhoUsed },
     });
 
-    sendDailyData(usersFromYesterday, analyticsFromYesterday, usersWhoUsed);
+    sendDailyData(usersFromYesterday, fileTextData, usersWhoUsed);
   }
 }
 
