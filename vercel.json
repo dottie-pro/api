@@ -1,15 +1,25 @@
 {
-    "version": 2,
-    "builds": [
-        {
-            "src": "./index.js",
-            "use": "@vercel/node"
-        }
-    ],
-     "rewrites": [
-        {
-            "source": "/(.*)",
-            "destination": "/"
-        }
-     ]
+  "version": 2,
+  "builds": [
+    {
+      "src": "./index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/check-new-users",
+      "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/check-trials",
+      "schedule": "0 0 * * *"
+    }
+  ]
 }

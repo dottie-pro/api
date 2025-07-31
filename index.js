@@ -29,7 +29,12 @@ const connectDB = async () => {
     });
 
     Scheduler.getInstance();
-    Routines.start();
+
+    // Only start routines in development environment
+    // In production, use Vercel cron jobs instead
+    if (process.env.NODE_ENV === "development") {
+      Routines.start();
+    }
   } catch (error) {
     console.log("ERRO:", error.errors);
     setTimeout(connectDB, 5000); // Retry after 5 seconds
