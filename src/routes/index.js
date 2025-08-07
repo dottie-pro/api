@@ -81,9 +81,7 @@ routes.get("/cron/check-new-users", async (req, res) => {
       });
     }
 
-    console.log("Cron job: Checking new users...");
     await DashboardRoutine.checkNewData();
-    console.log("Cron job: New users check completed");
 
     res.status(200).json({
       success: true,

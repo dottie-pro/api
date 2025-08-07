@@ -15,6 +15,8 @@ class DashboardRoutine {
       email: { $in: ["erickkarl5@gmail.com", "schmi@dottie.pro"] },
     });
 
+    console.log("Excluded users:", excludedUsers);
+
     const excludedUserIds = excludedUsers.map((user) => user._id);
 
     const usersFromYesterday = await User.find({
@@ -25,6 +27,8 @@ class DashboardRoutine {
       _id: { $nin: excludedUserIds },
     });
 
+    console.log("Users from yesterday:", usersFromYesterday);
+
     const fileTextData = await FileTextData.find({
       createdAt: {
         $gte: yesterday,
@@ -34,6 +38,9 @@ class DashboardRoutine {
         $nin: excludedUserIds,
       },
     });
+
+    console.log("File text data:", fileTextData);
+    console.log("User ids who used:", userIdsWhoUsed);
 
     const userIdsWhoUsed = fileTextData.map((analysis) => analysis.userId);
     const usersWhoUsed = await User.find({
