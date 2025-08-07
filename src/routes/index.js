@@ -66,6 +66,70 @@ routes.post(
 //Reports
 routes.get("/report/dashboard", checkAuth, ReportsController.reportDashboard);
 
+// Cron job routes
+routes.get("/cron/check-new-users", async (req, res) => {
+  try {
+    require("dotenv").config();
+    const mongoose = require("mongoose");
+    const DashboardRoutine = require("../services/routines/dashboardRoutine");
+
+    // Ensure database connection
+    if (mongoose.connection.readyState !== 1) {
+      await mongoose.connect(process.env.MONGODB_URL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      });
+    }
+
+    console.log("Cron job: Checking new users...");
+    await DashboardRoutine.checkNewData();
+    console.log("Cron job: New users check completed");
+
+    res.status(200).json({
+      success: true,
+      message: "New users check completed successfully",
+    });
+  } catch (error) {
+    console.error("Cron job error:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+routes.get("/cron/check-trials", async (req, res) => {
+  try {
+    require("dotenv").config();
+    const mongoose = require("mongoose");
+    const { Scheduler } = require("../services/scheduler/scheduler");
+
+    // Ensure database connection
+    if (mongoose.connection.readyState !== 1) {
+      await mongoose.connect(process.env.MONGODB_URL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      });
+    }
+
+    console.log("Cron job: Checking trials...");
+    const scheduler = Scheduler.getInstance();
+    await scheduler.startTimers();
+    console.log("Cron job: Trials check completed");
+
+    res.status(200).json({
+      success: true,
+      message: "Trials check completed successfully",
+    });
+  } catch (error) {
+    console.error("Cron job error:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
 // //File Routes
 routes.post(
   "/file/upload",
