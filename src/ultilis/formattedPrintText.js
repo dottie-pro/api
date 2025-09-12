@@ -123,9 +123,10 @@ async function processInstagram(text, format) {
       /(?:cliques?\s+no\s+arroba|arroba\s*clicks?)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
     clique_hashtag:
       /(?:nas\s+hashtags|hashtag\s*clicks?)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-    avancar: /(?:avan[çc]o|forward)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-    voltar: /(?:voltar|back)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-    sair: /(?:saiu|exited)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+    avancar:
+      /(?:avan[çc]o|forward|hist[óo]ria\s*seguinte)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+    voltar: /(?:voltar|back|retroceder)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+    sair: /(?:saiu|exited|sa[íi]das)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
     proximo_story:
       /(?:pr[óo]ximo\s+story|next\s*story)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
     visitas_perfil:
@@ -134,9 +135,11 @@ async function processInstagram(text, format) {
       /(?:come[çc]aram?\s+a?\s*seguir|started\s*following)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
     tempo_stories:
       /(?:tempo\s+nos\s+stories|time\s*on\s*stories)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-    curtidas: /(?:curtidas|likes)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-    salvamentos: /(?:salvamentos|saves)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
-    compartilhamentos: /(?:compartilhamentos|shares)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+    curtidas: /(?:curtidas|likes|gostos)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+    salvamentos:
+      /(?:salvamentos|saves|vezes\s*que\s*foi\s*guardad[oa])\s*[:\-]?\s*(\d+[,.]?\d*)/i,
+    compartilhamentos:
+      /(?:compartilhamentos|shares|partilhas)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
     comentarios:
       /(?:coment[áa]rios|respostas?|comments|replies)\s*[:\-]?\s*(\d+[,.]?\d*)/i,
   };
@@ -179,44 +182,83 @@ async function processInstagram(text, format) {
 
   if (format.toLowerCase() === "reels") {
     const result = text.toLowerCase().split(/\s+/);
-    const reproducaoIndex =
-      result.indexOf("reproduções") !== -1
-        ? result.indexOf("reproduções")
-        : result.indexOf("views");
-    const contasAlcancadasIndex =
-      result.indexOf("alcançadas") !== -1
-        ? result.indexOf("alcançadas")
-        : result.indexOf("accounts");
 
-    const alcanceReels = result.indexOf("alcance");
-
-    if (reproducaoIndex !== -1 && result[reproducaoIndex + 1]) {
-      const formattedValue = result[reproducaoIndex + 1].replace(/[,.]/g, "");
-      extractedData.visualizacoes = parseInt(formattedValue, 10) || 0;
+    const visualizacoesIndex = result.indexOf("visualizações");
+    if (visualizacoesIndex !== -1 && result[visualizacoesIndex + 1]) {
+      const formattedValue = result[visualizacoesIndex + 1].replace(
+        /[,.]/g,
+        ""
+      );
+      if (result[visualizacoesIndex - 2] == "facebook") {
+        extractedData.visualizacoes = null;
+      } else {
+        extractedData.visualizacoes = parseInt(formattedValue, 10) || 0;
+      }
     }
 
+    const contasAlcancadasIndex = result.indexOf("alcançadas");
     if (contasAlcancadasIndex !== -1 && result[contasAlcancadasIndex + 1]) {
-      extractedData.contas_alcancadas = result[contasAlcancadasIndex + 1];
-      extractedData.alcance = result[contasAlcancadasIndex + 1];
-      const alcanceFormatted = parseInt(
-        result[contasAlcancadasIndex + 1].replace(/[,.]/g, "")
+      const alcanceValue = result[contasAlcancadasIndex + 1].replace(
+        /[,.]/g,
+        ""
       );
+      extractedData.alcance = parseInt(alcanceValue, 10) || 0;
 
-      // Procurar as porcentagens próximas à posição do alcance
-      const nearbyWords = result.slice(alcanceReels, alcanceReels + 20); // Pega palavras ao redor do alcance
-      const porcentagens = nearbyWords.filter((word) => word.includes("%")); // Filtra as porcentagens
+      const retencaoIndex = result.indexOf("retenção");
+      if (retencaoIndex !== -1) {
+        const nearbyWords = result.slice(retencaoIndex, retencaoIndex + 20);
+        const porcentagens = nearbyWords.filter((word) => word.includes("%"));
 
-      if (porcentagens.length >= 2) {
-        let firstPorcentage = parseFloat(porcentagens[0].replace(",", "."));
-        let secondPorcentage = parseFloat(porcentagens[1].replace(",", "."));
-        // Se as porcentagens somam 100
-        if (firstPorcentage + secondPorcentage === 100) {
-          extractedData.seguidores_alcancados = Math.round(
-            calculationPercentageOfValue(firstPorcentage, alcanceFormatted)
-          );
-          extractedData.nao_seguidores_integram = Math.round(
-            calculationPercentageOfValue(secondPorcentage, alcanceFormatted)
-          );
+        if (porcentagens.length >= 2) {
+          let firstPorcentage = parseFloat(porcentagens[0].replace(",", "."));
+          let secondPorcentage = parseFloat(porcentagens[1].replace(",", "."));
+
+          if (Math.abs(firstPorcentage + secondPorcentage - 100) < 1) {
+            extractedData.seguidores_alcancados = Math.round(
+              calculationPercentageOfValue(
+                firstPorcentage,
+                extractedData.alcance
+              )
+            );
+            extractedData.nao_seguidores_integram = Math.round(
+              calculationPercentageOfValue(
+                secondPorcentage,
+                extractedData.alcance
+              )
+            );
+          }
+        }
+      }
+    }
+
+    const tempoMedioIndex = result.indexOf("médio");
+    if (tempoMedioIndex !== -1 && result[tempoMedioIndex + 3]) {
+      const tempoValue = result[tempoMedioIndex + 3];
+      if (tempoValue && !isNaN(parseInt(tempoValue))) {
+        extractedData.tempo_medio_visualizacao = parseInt(tempoValue, 10);
+      }
+    }
+
+    const duracaoIndex = result.indexOf("duração");
+    const visaoGeralIndex = result.indexOf("geral");
+
+    if (duracaoIndex !== -1 && visaoGeralIndex !== -1) {
+      const engagementSection = result.slice(duracaoIndex + 1, visaoGeralIndex);
+      const engagementNumbers = engagementSection
+        .filter((word) => !isNaN(parseInt(word)) && parseInt(word) > 0)
+        .map((word) => parseInt(word));
+
+      if (engagementNumbers.length >= 4) {
+        let startIndex = 0;
+        if (engagementNumbers[0] <= 24) {
+          startIndex = 1;
+        }
+
+        if (engagementNumbers.length >= startIndex + 4) {
+          extractedData.curtidas = engagementNumbers[startIndex];
+          extractedData.comentarios = engagementNumbers[startIndex + 1];
+          extractedData.compartilhamentos = engagementNumbers[startIndex + 2];
+          extractedData.salvamentos = engagementNumbers[startIndex + 3];
         }
       }
     }
@@ -224,7 +266,7 @@ async function processInstagram(text, format) {
 
   if (format.toLowerCase() === "story") {
     const cliqueArroba = text.match(
-      /(?:toques\s*em\s*figurinhas|cliques?\s+no\s+arroba)\s*[:\-]?\s*(\d+[,.]?\d*)/is
+      /(?:toques\s*em\s*figurinhas|toques\s*em\s*stickers|cliques?\s+no\s+arroba)\s*[:\-]?\s*(\d+[,.]?\d*)/is
     );
     if (cliqueArroba) {
       extractedData.clique_arroba = parseInt(
@@ -232,9 +274,7 @@ async function processInstagram(text, format) {
         10
       );
     }
-  }
 
-  if (format.toLowerCase() === "story") {
     // const alcanceMatch = text.match(/contas\s*alcançadas\s*[:\-]?\s*(\d+[,.]?\d*)/i);
     const alcanceMatch = text.match(
       /(?:contas\s*alcançadas|accounts\s*reached)\s*[:\-]?\s*(\d+[,.]?\d*)/i
@@ -262,40 +302,6 @@ async function processInstagram(text, format) {
         let firstPorcentage = parseFloat(porcentagens[0]?.replace(",", "."));
         let secondPorcentage = parseFloat(porcentagens[1]?.replace(",", "."));
 
-        if (firstPorcentage + secondPorcentage === 100) {
-          extractedData.seguidores_alcancados = Math.round(
-            calculationPercentageOfValue(firstPorcentage, alcanceFormatted)
-          );
-          extractedData.nao_seguidores_integram = Math.round(
-            calculationPercentageOfValue(secondPorcentage, alcanceFormatted)
-          );
-        }
-      }
-    }
-  }
-
-  if (format.toLowerCase() === "reels") {
-    // @TODO: trocar alcance para contas alcancadas (apenas valor) e recalcular alcance/seguidores e alcance/nao seguidores
-    // const alcanceMatch = text.match(/contas\s*alcançadas\s*[:\-]?\s*(\d+[,.]?\d*)/i);
-    const result = text
-      .toLowerCase()
-      .split(/\s+/)
-      .map((word) => removeAccents(word));
-
-    const alcanceReels = result.indexOf("alcance");
-
-    if (alcanceReels) {
-      const alcanceFormatted = parseInt(result[alcanceReels + 2]);
-      extractedData.alcance = extractedData.alcance || alcanceFormatted;
-
-      // Procurar as porcentagens próximas à posição do alcance
-      const nearbyWords = result.slice(alcanceReels, alcanceReels + 20); // Pega palavras ao redor do alcance
-      const porcentagens = nearbyWords.filter((word) => word.includes("%")); // Filtra as porcentagens
-
-      if (porcentagens.length >= 2) {
-        let firstPorcentage = parseFloat(porcentagens[0].replace(",", "."));
-        let secondPorcentage = parseFloat(porcentagens[1].replace(",", "."));
-        // Se as porcentagens somam 100
         if (firstPorcentage + secondPorcentage === 100) {
           extractedData.seguidores_alcancados = Math.round(
             calculationPercentageOfValue(firstPorcentage, alcanceFormatted)
