@@ -37,6 +37,7 @@ const ColumnsPlanilha = [
   "Salvamentos",
   "Compartilhamentos",
   "Comentarios/Respostas",
+  "Repostagens",
   "Data Publicacao",
   "Arquivos",
 ];
