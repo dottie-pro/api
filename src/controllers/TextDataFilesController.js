@@ -118,6 +118,7 @@ class TextDataFilesController {
             Salvamentos: Number(textData.salvamentos) || 0,
             Compartilhamentos: Number(textData.compartilhamentos) || 0,
             "Comentarios/Respostas": Number(textData.comentarios) || 0,
+            Repostagens: Number(textData.repostagens) || 0,
             "Data Publicacao": textData.data_publicacao
               ? textData.data_publicacao.toISOString().split("T")[0]
               : "",

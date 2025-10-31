@@ -128,6 +128,10 @@ const fileTextDataSchema = new Schema(
       type: String,
       default: null,
     },
+    repostagens: {
+      type: String,
+      default: null,
+    },
     data_publicacao: {
       type: Date,
       default: null,

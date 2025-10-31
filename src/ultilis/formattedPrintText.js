@@ -169,6 +169,7 @@ async function processInstagram(text, format) {
     compartilhamentos: null,
     comentarios: null,
     respostas: null,
+    repostagens: null,
   };
 
   // Itera sobre as linhas e associa as palavras-chave aos campos do extractedData
@@ -182,6 +183,14 @@ async function processInstagram(text, format) {
 
   if (format.toLowerCase() === "reels") {
     const result = text.toLowerCase().split(/\s+/);
+
+    // const vgIndex = result.indexOf("visão");
+    // if (visaoGeralIndex !== -1) {
+    //   // Verifica se o valor anterior é um número
+    //   if (result[visaoGeralIndex - 1].match(/\d+[,.]?\d*/i)) {
+    //     const formattedValue = result[visaoGeralIndex - 1].replace(/[,.]/g, "");
+    //   }
+    // }
 
     const visualizacoesIndex = result.indexOf("visualizações");
     if (visualizacoesIndex !== -1 && result[visualizacoesIndex + 1]) {
@@ -244,44 +253,105 @@ async function processInstagram(text, format) {
 
     if (duracaoIndex !== -1 && visaoGeralIndex !== -1) {
       const engagementSection = result.slice(duracaoIndex + 1, visaoGeralIndex);
-      const engagementNumbers = engagementSection
-        .filter((word) => !isNaN(parseInt(word)) && parseInt(word) > 0)
-        .map((word) => parseInt(word));
+      const engagementNumbers = [];
 
-      if (engagementNumbers.length >= 4) {
-        let startIndex = 0;
-        if (engagementNumbers[0] <= 24) {
-          startIndex = 1;
+      // Process the section to extract numbers with decimals and multipliers
+      for (let i = 0; i < engagementSection.length; i++) {
+        const current = engagementSection[i];
+        const next = engagementSection[i + 1];
+
+        // Check if current is a number pattern (with comma or dot as decimal separator)
+        const numberPattern = /^(\d+)[,.](\d+)$/;
+        const integerPattern = /^(\d+)$/;
+
+        let numericValue = null;
+
+        if (numberPattern.test(current)) {
+          // Handle decimal numbers like "1,5" or "1.5"
+          const match = current.match(numberPattern);
+          const wholePart = match[1];
+          const decimalPart = match[2];
+          // Convert comma to dot for parsing (Portuguese notation)
+          numericValue = parseFloat(wholePart + "." + decimalPart);
+
+          // Check if next element is a multiplier
+          if (
+            next &&
+            (next === "mil" || next === "milhão" || next === "milhões")
+          ) {
+            if (next === "mil") {
+              numericValue *= 1000;
+            } else if (next === "milhão" || next === "milhões") {
+              numericValue *= 1000000;
+            }
+            i++; // Skip the multiplier word
+          }
+        } else if (integerPattern.test(current)) {
+          // Handle integer numbers
+          numericValue = parseInt(current, 10);
+
+          // Check if next element is a multiplier
+          if (
+            next &&
+            (next === "mil" || next === "milhão" || next === "milhões")
+          ) {
+            if (next === "mil") {
+              numericValue *= 1000;
+            } else if (next === "milhão" || next === "milhões") {
+              numericValue *= 1000000;
+            }
+            i++; // Skip the multiplier word
+          }
         }
 
-        if (engagementNumbers.length >= startIndex + 4) {
-          extractedData.curtidas = engagementNumbers[startIndex];
-          extractedData.comentarios = engagementNumbers[startIndex + 1];
-          extractedData.compartilhamentos = engagementNumbers[startIndex + 2];
-          extractedData.salvamentos = engagementNumbers[startIndex + 3];
+        // Add valid numbers (excluding very small numbers that might be durations like "1:17")
+        if (numericValue !== null && numericValue > 0 && numericValue >= 1) {
+          engagementNumbers.push(Math.round(numericValue));
         }
       }
+
+      const sizeEngagementNumbers = engagementNumbers.length;
+
+      extractedData.curtidas = engagementNumbers[sizeEngagementNumbers - 5];
+      extractedData.comentarios = engagementNumbers[sizeEngagementNumbers - 4];
+      extractedData.compartilhamentos =
+        engagementNumbers[sizeEngagementNumbers - 3];
+      extractedData.repostagens = engagementNumbers[sizeEngagementNumbers - 2];
+      extractedData.salvamentos = engagementNumbers[sizeEngagementNumbers - 1];
     }
   }
 
   if (format.toLowerCase() === "story") {
-    const cliqueArroba = text.match(
-      /(?:toques\s*em\s*figurinhas|toques\s*em\s*stickers|cliques?\s+no\s+arroba)\s*[:\-]?\s*(\d+[,.]?\d*)/is
-    );
-    if (cliqueArroba) {
-      extractedData.clique_arroba = parseInt(
-        cliqueArroba[1].replace(/[,.]/g, ""),
-        10
-      );
+    // Extract and sum all @username values
+    const arrobaRegex = /@\S+\s+(\d+[,.]?\d*)/g;
+    let totalArroba = 0;
+    let arrobaMatch;
+    while ((arrobaMatch = arrobaRegex.exec(text)) !== null) {
+      const value = parseInt(arrobaMatch[1].replace(/[,.]/g, ""), 10) || 0;
+      totalArroba += value;
+    }
+    if (totalArroba > 0) {
+      extractedData.clique_arroba = extractedData.clique_arroba || 0;
+      extractedData.clique_arroba += totalArroba;
+    }
+
+    // Extract and sum all #hashtag values
+    const hashtagRegex = /#\S+\s+(\d+[,.]?\d*)/g;
+    let totalHashtag = 0;
+    let hashtagMatch;
+    while ((hashtagMatch = hashtagRegex.exec(text)) !== null) {
+      const value = parseInt(hashtagMatch[1].replace(/[,.]/g, ""), 10) || 0;
+      totalHashtag += value;
+    }
+    if (totalHashtag > 0) {
+      extractedData.clique_hashtag = extractedData.clique_hashtag || 0;
+      extractedData.clique_hashtag += totalHashtag;
     }
 
     // const alcanceMatch = text.match(/contas\s*alcançadas\s*[:\-]?\s*(\d+[,.]?\d*)/i);
     const alcanceMatch = text.match(
       /(?:contas\s*alcançadas|accounts\s*reached)\s*[:\-]?\s*(\d+[,.]?\d*)/i
     );
-
-    // console.log('text: ', text)
-    // console.log('alcanceMatch: ', alcanceMatch)
 
     if (alcanceMatch) {
       const alcanceFormatted = parseInt(alcanceMatch[1].replace(/[.,]/g, ""));
